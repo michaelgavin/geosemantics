@@ -1,0 +1,35 @@
+Package: geosemantics
+Title: Language of Place (Code, Data, and Supplemental Materials)
+Version: 0.0.0.9000
+Authors@R: person("Michael", "Gavin", email = "michael.a.gavin@gmail.com", role = c("aut", "cre"))
+URL: https://michaelgavin.github.io/language-of-place/, http://
+    modelingliteraryhistory.org/
+Description: Supplemental files and code to go along with Language of Place:
+    a Digital History, by Michael Gavin. All data used in the book and all
+    functions are included. Vignettes for each chapter invite readers and
+    students to follow along and to recreate the analysis on their own machines.
+Depends:
+    R (>= 3.3.3)
+Imports:
+    ggplot2,
+    Matrix,
+    irlba
+Suggests:
+    igraph,
+    knitr,
+    rmarkdown
+License: GPL-3.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1
+Collate:
+    'cosine_similarity.R'
+    'great_circle_distance.R'
+    'place_composition.R'
+    'place_join.R'
+    'plot_semantic_map.R'
+    'plot_timeseries.R'
+    'ppmi.R'
+    'semantic_footprint.R'
+    'semantic_similarity.R'
+VignetteBuilder: knitr

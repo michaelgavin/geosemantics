@@ -1,0 +1,129 @@
+---
+title: "Chapter 1: Early Modern Cosmography"
+author: "Michael Gavin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chapter 1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Introduction
+Chapter 1 studies the language of geographical description in English from the years 1473 to 1700. This chapter introduces the basic premise of **historical geospatial semantics**, an interpretive paradigm that studies the history of geographical thinking by tracing changes in the way places are described.
+
+By inserting the question of place into a study of meaning, geosemantics invites a style of thinking that constantly toggles back and forth between two perspectives: the **place perspective** and the **word perspective**. From the place perspective, we might ask: "What are all the ways Paris has been described, and how is Paris different from London?" From the word perspective, we might ask: "Where are 'natives' most often referred to, and how are 'natives' in America different from 'natives' in Europe?"
+
+The trick of geosemantics is to shuffle a corpus around so that these kinds of patterns can be identified.
+
+### The Data
+Mathematically, categories like lists of places, words, and documents are represented as vector spaces. A **vector** is a fixed list of elements. What makes it a *space* is that each of those elements can be added together, scaled, or otherwise distorted.
+
+*P* is a vector space of length 14,937. Each element *p* in *P* is a unique toponym found in EEBO.
+
+*W* is a vector space of length 7,507. Each element *w* in *W* is a high frequency word from EEBO. (We built this list by sampling from across the period to include various spellings of major words.)
+
+*D* is a vector space of length 59,226. Each element *d* in *D* is a document transcribed and marked up by the Text Creation Partnership.
+
+A **matrix** is a two-dimensional array of numbers that describes how two vector spaces relate to each other. It represents a linear map that transforms the space of one vector onto the space of another. 
+
+The analysis in this chapter hinges on toggling across three kinds of matrices: 
+
+- the **place-document** matrix shows how often places are mentioned in each document.
+
+- the **word-document** matrix shows how often keywords appear in documents
+
+- the **word-place** matrix shows how often keywords appear within a context window of 5 words of places
+
+In the `geosemantics` R-package, these matrices would be too big for R's memory to handle individually, so they're broken up by date into 5 sections.
+
+- 1473 to 1599 (5,172 docs)
+- 1600 to 1639 (7,837 docs)
+- 1640 to 1659 (17,058 docs)
+- 1660 to 1679 (11,108 docs)
+- 1680 to 1699 (18,051 docs)
+
+Lastly, the place-document matrices are gathered in a single table sorted by year.
+
+- the **place-year** matrix shows how often places are mentioned each year, 1473 to 1699.
+
+
+### The Metadata
+The TEI files prepared by the Text Creation Partnership include detailed metadata in their headers. This includes bibliographic information about the original sources. In the analyses below, we will often organize documents by date, but otherwise we will basically ignore information like author, title, etc.
+
+More important are two sets of metadata about EEBO's places. One is a table of longitude and latitude coordinates, taken from several geographical dictionaries published in the 17th century. Another is a gazetteer of places, also taken from the primary sources, which identifies each place within a global topology.
+
+The gazetteer is structured in a *subject-predicate-object* tuple format. Entries in the gazetteer look like this:
+
+
+SUBJECT  | PREDICATE   | OBJECT
+---------|-------------|-------
+paris    | instance of | city
+paris    | is in       | france
+france   | instance of | country
+france   | is in       | europe
+luetetia | is same as  | paris
+
+Where does this information come from? It comes for seventeenth-century collections of geographical dictionaries. Here are the first few sentences from the relevant entry for Paris, in Edward Bohun's [*A geographical dictionary representing the present and ancient names of all the counties, provinces, remarkable cities, universities, ports, towns, mountains, seas, streights, fountains, and rivers of the whole world*](http://downloads.it.ox.ac.uk/ota-public/tcp/Texts-HTML/free/A28/A28561.html) (1693):
+
+> Paris, Leutetia, Luotetia, Lucetia, Leucotetia, Parisii, and Lutetia Parisiorum, the Capital City of the Kingdom of France; boasted by Baudrand, to be the greatest City of Europe; with a Nemine reclamante, no body denying it to be so. This was a celebrated City in the Times of the Roman Empire. Julian the Apostate (whilst he was Caesar only) resided here in the Reign of Constantius: and adorned it with Baths and a Palace. But its greatest Rise was from the Franks: Clodoveus settling the Royal Throne in this City, about the year 458. 
+
+Place descriptions like these are highly formulaic, and the geographical data curated for this chapter were put together by semi-automatically scrolling through such books and converting relevant information to the simple tuple format expressed above. Only three kinds of relations were gathered, categorical definitions ("instance of"), containment relations ("is in"), and equivalence relations ("is same as").
+
+The goal is to be able to gather all descriptions of a place, even if the place had different names at different times. (Spelling variations were common.) Also, I want the option to search descriptions of larger geographical units, not just for uses of the word *Germany* but also for descriptions of Germany's provinces, cities, towns, and rivers. I want the option to compile them into a single statistical profile.
+
+Begin by loading the gazetter data and selecting rows with information about Paris:
+```{r}
+library(geosemantics)
+data(ch1)
+gaz = ch1$gazetteer
+ord = which(gaz$SUBJECT == "paris" | gaz$OBJECT == "paris")
+gaz[ord,]
+```
+
+You'll notice some 
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
