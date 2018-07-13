@@ -75,11 +75,38 @@ The goal is to be able to gather all descriptions of a place, even if the place 
 Begin by loading the gazetter data and selecting rows with information about Paris:
 ```{r}
 library(geosemantics)
-data(ch1)
+data("ch1_metadata")
 gaz = ch1$gazetteer
 ord = which(gaz$SUBJECT == "paris" | gaz$OBJECT == "paris")
 gaz[ord,]
 ```
+
+To read over the gazetteer's topology, you can find places of a given type:
+
+```{r}
+ord = which(gaz$PREDICATE == "instance of" & gaz$OBJECT == "town")
+gaz[ord[1:10],]
+```
+
+Or, places contained in a given region:
+
+```{r}
+ord = which(gaz$PREDICATE == "is in" & gaz$OBJECT == "france")
+gaz[ord[1:10],]
+```
+
+Searches can be combined in any way. Also, the gazetteer can be treated as an edgelist for a network graph. 
+
+```{r}
+library(igraph)
+ord = which(gaz$OBJECT %in% gaz$SUBJECT)
+g = graph.edgelist(el = as.matrix(gaz[ord,c(1,3)]))
+E(g)$PREDICE = gaz$PREDICATE[ord]
+sort(degree(g), decreasing = T)[1:10]
+```
+
+The European focus of the gazetteer comes immediately into focus. Spain is a massive geopolitical entity connecting to hundreds of other places. America, you'll notice, doesn't even break into the top ten.
+
 
 You'll notice some 
 - Never uses retina figures
