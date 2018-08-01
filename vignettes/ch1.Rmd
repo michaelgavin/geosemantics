@@ -12,12 +12,12 @@ vignette: >
 ### Introduction
 Chapter 1 studies the language of geographical description in English from the years 1473 to 1700. This chapter introduces the basic premise of **historical geospatial semantics**, an interpretive paradigm that studies the history of geographical thinking by tracing changes in the way places are described.
 
-By inserting the question of place into a study of meaning, geosemantics invites a style of thinking that constantly toggles back and forth between two perspectives: the **place perspective** and the **word perspective**. From the place perspective, we might ask: "What are all the ways Paris has been described, and how is Paris different from London?" From the word perspective, we might ask: "Where are 'natives' most often referred to, and how are 'natives' in America different from 'natives' in Europe?"
+By inserting the question of place into a study of meaning, geosemantics invites a style of analysis that constantly toggles back and forth between two perspectives: the **place perspective** and the **word perspective**. From the place perspective, we might ask: "What are all the ways Paris has been described, and how is Paris different from London?" From the word perspective, we might ask: "Where are 'natives' most often referred to, and how are 'natives' in America different from 'natives' in Europe?"
 
 The trick of geosemantics is to shuffle a corpus around so that these kinds of patterns can be identified.
 
 ### The Data
-Mathematically, categories like lists of places, words, and documents are represented as vector spaces. A **vector** is a fixed list of elements. What makes it a *space* is that each of those elements can be added together, scaled, or otherwise distorted.
+Mathematically, categories like lists of places, words, and documents are represented as vector spaces. A **vector** is a fixed list of elements. What makes it a *space* is that each of those elements can be added together, scaled, or otherwise distorted. The term *vector space* names what we might think of colloquially as the range of possibility over which any sequence of numbers might be scaled or transformed, while it's general shape remains preserved.
 
 *P* is a vector space of length 14,937. Each element *p* in *P* is a unique toponym found in EEBO.
 
@@ -75,40 +75,53 @@ The goal is to be able to gather all descriptions of a place, even if the place 
 Begin by loading the gazetter data and selecting rows with information about Paris:
 ```{r}
 library(geosemantics)
-data("ch1_metadata")
-gaz = ch1$gazetteer
+data("ch1_gazetteer")
 ord = which(gaz$SUBJECT == "paris" | gaz$OBJECT == "paris")
 gaz[ord,]
 ```
 
-To read over the gazetteer's topology, you can find places of a given type:
+You'll notice some idiosyncrasies in the data. Much information is repeated across different sources. The designation "is same as" is, on the face of it, rather vague and shouldn't be interpreted too literally. It gathers together two different correspondence relations that might benefit from better specification: "formerly known as" and "alternate spelling of." The analysis in this chapter collapses those relationships into a single composite sense of sameness, such that all values corresponding to Paris are either treated individually or get added together and measured as a common unit.
+
+The function that performs this collapse is called `place_join`. It reads over the gazetteer and returns all place names that are related over the gazetteer.
 
 ```{r}
-ord = which(gaz$PREDICATE == "instance of" & gaz$OBJECT == "town")
-gaz[ord[1:10],]
+place_join("france", gaz = gaz, mode = "same")
 ```
 
-Or, places contained in a given region:
+To include places that are inside a larger place, use `mode = "all`
 
 ```{r}
-ord = which(gaz$PREDICATE == "is in" & gaz$OBJECT == "france")
-gaz[ord[1:10],]
+place_join("france", gaz = gaz, mode = "all")[1:20]
 ```
 
-Searches can be combined in any way. Also, the gazetteer can be treated as an edgelist for a network graph. 
+Selecting `mode = "all"` thus returns not only "france" and it's various spellings, but also places in France, like "anjou", "artois", or "aquitain."
+
+Once related places are identified, their entries in the datasets can be compiled. Using the place-year matrix, for example, we can see how all references to French places are distributed over time throughout EEBO.
 
 ```{r}
-library(igraph)
-ord = which(gaz$OBJECT %in% gaz$SUBJECT)
-g = graph.edgelist(el = as.matrix(gaz[ord,c(1,3)]))
-E(g)$PREDICE = gaz$PREDICATE[ord]
-sort(degree(g), decreasing = T)[1:10]
+french_places = place_join("france", gaz = gaz, mode = "all")
+place_composition(mat = py, places = french_places)[28:47]
 ```
 
-The European focus of the gazetteer comes immediately into focus. Spain is a massive geopolitical entity connecting to hundreds of other places. America, you'll notice, doesn't even break into the top ten.
+This little pass through the data shows spikes of interest in French places in the years 1502, 1506, and 1515. We could dig into those years to find which documents are most responsible for those spikes, but instead let's look over EEBO as a whole.
+
+First let's trim the 1400s data from the set, because it's so sparse is tends to distort the visualizations.
+
+```{r}
+load(ch1_place_year)
+py = py[,27:226]
+py = as.matrix(py)
+```
+
+Now let's look at references to France (including all French places), from 1500 through 1699.
+
+```{r}
+plot_timeseries(mat = py, places = "france")
+```
+
+For the first hundred years of the corpus, French places represent only a small proportion of 
 
 
-You'll notice some 
 - Never uses retina figures
 - Has a smaller default figure size
 - Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style

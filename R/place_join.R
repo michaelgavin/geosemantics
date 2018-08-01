@@ -5,7 +5,7 @@
 #' @export
 place_join = function(places, gaz, mode = "all") {
   places = c(places,gaz$SUBJECT[intersect(grep("same", gaz$PREDICATE), which(gaz$OBJECT %in% places))])
-  places = c(places,gaz$OBJECT[intersect(grep("same", gaz$PREDICATE), which(gaz$OBJECT %in% places))])
+  places = c(places,gaz$OBJECT[intersect(grep("same", gaz$PREDICATE), which(gaz$SUBJECT %in% places))])
   places = c(places,gaz$SUBJECT[intersect(grep("same", gaz$PREDICATE), which(gaz$OBJECT %in% places))])
   places = unique(places)
   

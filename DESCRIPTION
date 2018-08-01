@@ -7,7 +7,8 @@ URL: https://michaelgavin.github.io/language-of-place/, http://
 Description: Supplemental files and code to go along with Language of Place:
     a Digital History, by Michael Gavin. All data used in the book and all
     functions are included. Vignettes for each chapter invite readers and
-    students to follow along and to recreate the analysis on their own machines.
+    students to follow along with, recreate, and extend the analyses on their 
+    own computers.
 Depends:
     R (>= 3.3.3)
 Imports:
