@@ -75,6 +75,7 @@ The goal is to be able to gather all descriptions of a place, even if the place 
 Begin by loading the gazetter data and selecting rows with information about Paris:
 ```{r}
 library(geosemantics)
+library(ggplot2)
 data("ch1_gazetteer")
 ord = which(gaz$SUBJECT == "paris" | gaz$OBJECT == "paris")
 gaz[ord,]
@@ -116,10 +117,90 @@ py = as.matrix(py)
 Now let's look at references to France (including all French places), from 1500 through 1699.
 
 ```{r}
-plot_timeseries(mat = py, places = "france")
+plot_timeseries(mat = py, places = "france", compose_places = F)
 ```
 
 For the first hundred years of the corpus, French places represent only a small proportion of 
+
+Lest you think that's merely a function of spelling variation, we can also examine distribution of the term "fraunce."
+
+```{r}
+plot_timeseries(mat = py, places = "fraunce", compose_places = F)
+```
+
+
+```{r}
+plot_timeseries(mat = py, places = "france", compose_places = T)
+```
+
+```{r}
+plot_timeseries(mat = py, places = c("france","britain"), compose_places = T)
+```
+```{r}
+continents = gaz$SUBJECT[gaz$OBJECT == "continent"]
+continents = unique(continents)
+plot_timeseries(mat = py, places = continents, compose_places = T)
+```
+
+```{r}
+european_places = place_join("europe", gaz = gaz)
+british_places = place_join("britain", gaz = gaz)
+european_places = european_places[european_places %in% british_places == F]
+
+british_places = british_places[british_places %in% rownames(py)]
+british_freqs = colSums(py[british_places,]) / colSums(py)
+
+european_places = european_places[european_places %in% rownames(py)]
+european_freqs = colSums(py[european_places,]) / colSums(py)
+
+place = rep("britain", 200)
+year = 1500:1699
+count = british_freqs
+
+PLACE = c(place, rep("europe (ex. britain)",200))
+YEAR = c(year,1500:1699)
+COUNT = c(count, european_freqs)
+df = data.frame(PLACE, YEAR, COUNT)
+ggplot(df, aes(x = YEAR, y = COUNT, color = PLACE)) + 
+    geom_point() + 
+    stat_smooth(method = loess, aes(group = PLACE), se = F, fullrange = F) + 
+    theme(panel.background = element_blank(),
+          axis.title = element_blank()) +
+    scale_x_discrete(breaks=c("1500","1600","1699"),
+                     labels=c("1500", "1600", "1700"))
+```
+
+
+```{r}
+plot_timeseries(mat = py, places = c("egypt","italy","greece"), compose_places = T)
+```
+
+```{r}
+plot_timeseries(mat = py, places = c("china","india"), compose_places = T)
+```
+
+```{r}
+plot_timeseries(mat = py, places = c("peru","mexico"), compose_places = T)
+```
+
+
+
+```{r}
+plot_timeseries(mat = py, places = c("virginia","boston","jamaica"), compose_places = T)
+```
+
+```{r}
+plot_timeseries(mat = py, places = c("edinburgh","dublin"), compose_places = T)
+```
+
+```{r}
+plot_timeseries(mat = py, places = c("oxford","cambridge"), compose_places = T)
+```
+
+NEXT STEP:
+
+COMPOSE TABLE OF TOP 20 TOPONYMS, BY 20-YEAR PERIOD, 1500-1699
+
 
 
 - Never uses retina figures
