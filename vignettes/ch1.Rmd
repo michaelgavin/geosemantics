@@ -100,6 +100,7 @@ Selecting `mode = "all"` thus returns not only "france" and it's various spellin
 Once related places are identified, their entries in the datasets can be compiled. Using the place-year matrix, for example, we can see how all references to French places are distributed over time throughout EEBO.
 
 ```{r}
+data("ch1_place_year")
 french_places = place_join("france", gaz = gaz, mode = "all")
 place_composition(mat = py, places = french_places)[28:47]
 ```
@@ -109,7 +110,6 @@ This little pass through the data shows spikes of interest in French places in t
 First let's trim the 1400s data from the set, because it's so sparse is tends to distort the visualizations.
 
 ```{r}
-load(ch1_place_year)
 py = py[,27:226]
 py = as.matrix(py)
 ```
@@ -120,22 +120,28 @@ Now let's look at references to France (including all French places), from 1500 
 plot_timeseries(mat = py, places = "france", compose_places = F)
 ```
 
-For the first hundred years of the corpus, French places represent only a small proportion of 
+For the first hundred years of the corpus, "france" represent only a small proportion of the corpus, but it bursts into the scene around the year 1600. We might be tempted to find a historical explanation for this trend -- perhaps during Queen Elizabeth I's reign France gained some important new prominence in English discourse -- 
 
-Lest you think that's merely a function of spelling variation, we can also examine distribution of the term "fraunce."
+but it turns out just to be an artifact of spelling changes.
 
 ```{r}
 plot_timeseries(mat = py, places = "fraunce", compose_places = F)
 ```
 
+To get around such problems, the parameter `compose_places` gathers together all variations of a placename, as well as any smaller places it might contain. So this graph counts not just references to the word type "france" but also "fraunce" and other places, like "paris," "brittany," and "lourraine" that France contains.
 
 ```{r}
 plot_timeseries(mat = py, places = "france", compose_places = T)
 ```
 
+Turns out that references to French and British places mirror each other quite closely.
+
 ```{r}
 plot_timeseries(mat = py, places = c("france","britain"), compose_places = T)
 ```
+
+It's also possible to look at continents. Where was attention focused?
+
 ```{r}
 continents = gaz$SUBJECT[gaz$OBJECT == "continent"]
 continents = unique(continents)
