@@ -19,4 +19,3 @@ x = c(3,0,0,2)
 y = c(0,2,0,1)
 cosine_similarity(x, y)
 }
-

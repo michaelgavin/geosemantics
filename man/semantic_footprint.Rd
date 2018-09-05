@@ -9,4 +9,3 @@ semantic_footprint(mat, term, coords)
 \description{
 Measures the semantic footprint of a term (computed over place-keyword matrix)
 }
-

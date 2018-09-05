@@ -11,4 +11,3 @@ place_join(places, gaz, mode = "all")
 Given a gazetteer and a place name, finds all places that correspond to
 and/or are contained within it.
 }
-

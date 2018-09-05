@@ -9,4 +9,3 @@ place_composition(mat, places)
 \description{
 Adds together the vectors corresponding to a list of place names.
 }
-

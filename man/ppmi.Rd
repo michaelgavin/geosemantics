@@ -9,4 +9,3 @@ ppmi(mat)
 \description{
 Calculates ppmi for a matrix
 }
-

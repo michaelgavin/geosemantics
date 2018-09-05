@@ -9,4 +9,3 @@ great_circle_distance(lon1, lat1, lon2, lat2, radius = 3437)
 \description{
 Computes the great-circle distance between two coordinate points.
 }
-

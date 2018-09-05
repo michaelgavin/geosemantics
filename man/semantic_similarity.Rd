@@ -19,4 +19,3 @@ similarity scores
 \description{
 Compute similarity over a matrix
 }
-

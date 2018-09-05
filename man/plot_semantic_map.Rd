@@ -9,4 +9,3 @@ plot_semantic_map(mat, terms, coords)
 \description{
 Plots all places where a key term is used. Computed over place-keyword matrix.
 }
-

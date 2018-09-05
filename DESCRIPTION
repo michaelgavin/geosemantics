@@ -22,7 +22,7 @@ Suggests:
 License: GPL-3.0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.0
 Collate:
     'cosine_similarity.R'
     'great_circle_distance.R'
