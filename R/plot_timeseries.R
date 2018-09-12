@@ -2,7 +2,7 @@
 #' Plots timeseres over a place-year matrix (1500-1699).
 #'
 #' @export
-plot_timeseries = function(mat = py, gazetteer = gaz, places, normalize = T, compose_places = T) {
+plot_timeseries = function(mat = py, gazetteer = gaz, places, normalize = T, compose_places = T, mode = "all") {
   if (ncol(mat) != 200) {
     stop("This graphing function assumes you are using data only from 1500 through 1699.")
   }
@@ -18,7 +18,7 @@ plot_timeseries = function(mat = py, gazetteer = gaz, places, normalize = T, com
   for (i in 1:length(places)) {
     term = places[i]
     if (compose_places == T) {
-      pnames = place_join(term, gaz = gazetteer)
+      pnames = place_join(term, gaz = gazetteer, mode = mode)
       vec = place_composition(place = pnames, mat = mat)
     } else {
       vec = mat[term,]

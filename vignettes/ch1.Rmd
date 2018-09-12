@@ -95,7 +95,7 @@ To include places that are inside a larger place, use `mode = "all`
 place_join("france", gaz = gaz, mode = "all")[1:20]
 ```
 
-Selecting `mode = "all"` thus returns not only "france" and it's various spellings, but also places in France, like "anjou", "artois", or "aquitain."
+Selecting `mode = "all"` thus returns not only "france" and its various spellings, but also places in France, like "anjou", "artois", or "aquitain."
 
 Once related places are identified, their entries in the datasets can be compiled. Using the place-year matrix, for example, we can see how all references to French places are distributed over time throughout EEBO.
 
@@ -107,7 +107,7 @@ place_composition(mat = py, places = french_places)[28:47]
 
 This little pass through the data shows spikes of interest in French places in the years 1502, 1506, and 1515. We could dig into those years to find which documents are most responsible for those spikes, but instead let's look over EEBO as a whole.
 
-First let's trim the 1400s data from the set, because it's so sparse is tends to distort the visualizations.
+First let's trim the 1400s data from the set, because it's so sparse it tends to distort the visualizations.
 
 ```{r}
 py = py[,27:226]
@@ -203,11 +203,39 @@ plot_timeseries(mat = py, places = c("edinburgh","dublin"), compose_places = T)
 plot_timeseries(mat = py, places = c("oxford","cambridge"), compose_places = T)
 ```
 
+
+
+```{r}
+plot_timeseries(mat = py, places = c("england","rome","israel"), compose_places = T, mode = "same")
+```
 NEXT STEP:
 
 COMPOSE TABLE OF TOP 20 TOPONYMS, BY 20-YEAR PERIOD, 1500-1699
 
+```{r}
+PLACE = c()
+COUNT = c()
+PERIOD = c()
+for (i in 1:5) {
+  print(i)
+  fname = paste("ch1_pd",i,".rda", sep = "")
+  load(system.file("extdata", fname, package = "geosemantics"))
+  totals = rowSums(pd)
+  totals = sort(totals, decreasing = T)[1:50]
+  place = names(totals)
+  ct = totals
+  period = rep(i, 50)
+  PLACE = c(PLACE,place)
+  COUNT = c(COUNT,ct)
+  PERIOD = c(PERIOD,period)
+}
+df = data.frame(PLACE,COUNT,PERIOD)
+```
 
+**Note: Actually, the above table is pretty useless. Top three toponyms, across all five periods, are Rome, England, and Israel. That's all I need to say.**
+
+### Semantic mapping
+Start by drawing a few simple semantic maps: showing the distribution of words. Then move to talk about semantic drift.
 
 - Never uses retina figures
 - Has a smaller default figure size
@@ -230,8 +258,12 @@ The `html_vignette` template includes a basic CSS theme. To override this theme 
 The figure sizes have been customised so that you can easily put two images side-by-side. 
 
 ```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+tf_idf = function(mat) {
+  #browser()
+  idf = apply(mat, 2, function(x) log(length(x) / length(x[x > 0])))
+  mat = apply(mat, 1, function(x) x * idf)
+  return(mat)
+}
 ```
 
 You can enable figure captions by `fig_caption: yes` in YAML:
