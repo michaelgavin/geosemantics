@@ -5,7 +5,7 @@
 \title{Plots timeseres over a place-year matrix (1500-1699).}
 \usage{
 plot_timeseries(mat = py, gazetteer = gaz, places, normalize = T,
-  compose_places = T)
+  compose_places = T, mode = "all")
 }
 \description{
 Plots timeseres over a place-year matrix (1500-1699).
