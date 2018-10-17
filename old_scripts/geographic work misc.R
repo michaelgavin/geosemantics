@@ -397,9 +397,13 @@ slopes = matrix(0, nrow(py), 2)
 colnames(slopes) = c("pre","post")
 rownames(slopes) = rownames(py)
 totals = colSums(composed_py)
+normed_py = composed_py
+for (j in 1:ncol(normed_py)) {
+  normed_py[,j] = normed_py[,j] / sum(normed_py[,j])
+}
 for (i in 1:nrow(composed_py)) {
   print(i)
-  vec = composed_py[i,]
+  vec = normed_py[i,]
   x = seq(from = 0, to = 1, length.out = 100)
   fit = lm(vec[1:100] ~ x)
   slope1 = fit$coefficients[2]
