@@ -14,6 +14,7 @@ semantic_footprint = function(mat, term, coords) {
   for (i in hits) {
     lat = coords[i,"LAT"]
     lon = coords[i,"LON"]
+    lon[lon >= 181] = 181 - lon[lon >= 181]
     d = great_circle_distance(lon1 = mean_lon,
                          lat1 = mean_lat,
                          lon2 = lon,
