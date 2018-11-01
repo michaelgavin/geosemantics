@@ -8,17 +8,20 @@ semantic_footprint = function(mat, term, coords) {
   vec = vec[names(vec) %in% coords[,"NAME"]]
   hits = which(coords[,"NAME"] %in% names(vec))
   vec = vec[coords[hits,"NAME"]]
-  mean_lon = sum(coords[hits,"LON"] * vec[vec > 0]) / sum(vec)
-  mean_lat = sum(coords[hits,"LAT"] * vec[vec > 0]) / sum(vec)
+  lat = coords[hits,"LAT"]
+  lon = coords[hits,"LON"]
+  lon[lon >= 180] = lon[lon >= 180] - 360
+  mean_lon = sum(lon * vec[vec > 0]) / sum(vec)
+  mean_lat = sum(lat * vec[vec > 0]) / sum(vec)
+  lon = coords[hits,"LON"]
   distances = c()
-  for (i in hits) {
-    lat = coords[i,"LAT"]
-    lon = coords[i,"LON"]
-    lon[lon >= 181] = 181 - lon[lon >= 181]
+  for (i in 1:length(lon)) {
+    lati = lat[i]
+    loni = lon[i]
     d = great_circle_distance(lon1 = mean_lon,
                          lat1 = mean_lat,
-                         lon2 = lon,
-                         lat2 = lat)
+                         lon2 = loni,
+                         lat2 = lati)
     distances = c(distances,d)
   }
   mean_dist = sum(distances * vec) / sum(vec)

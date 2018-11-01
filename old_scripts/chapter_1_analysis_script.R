@@ -100,16 +100,17 @@ for (i in 386:length(places)) {
 }
 save(composed_pk, file = "~/Desktop/composed_pk.rda")
 
-totals = rowSums(composed_pk)
+
 
 # Get centroid of all PK
+totals = rowSums(composed_pk)
 vec = totals
 coords = ch1$coordinates
 vec = vec[names(vec) %in% coords[, "NAME"]]
 hits = which(coords[, "NAME"] %in% names(vec))
 vec = vec[coords[hits, "NAME"]]
 lon = coords[hits, "LON"]
-lon[lon >= 181] = 181 - lon[lon >= 181]
+lon[lon >= 180] = lon[lon >= 180] - 360
 lat = coords[hits, "LAT"]
 mean_lon = sum(lon * vec) / sum(vec)
 mean_lat = sum(lat * vec) / sum(vec)
@@ -128,7 +129,7 @@ for (i in 1:length(lon)) {
 
 # Get places closest to unweighted centroid
 un_d = c()
-for (i in 1:nrow(coords)) {
+for (i in 1:nrow(lonlat)) {
   loni = lon[i]
   lati = lat[i]
   distance = great_circle_distance(lon1 = loni, lat1 = lati, lon2 = unweighted_mean_lon, lat2 = unweighted_mean_lat)
@@ -145,6 +146,11 @@ ord = which(lon < 60 & lat > 30)
 plot(lon[ord], lat[ord], pch = 20, col = "gray")
 points(unweighted_mean_lon, unweighted_mean_lat, pch = 18, col = "black", cex = 2)
 points(mean_lon, mean_lat, pch = 18, col = "black", cex = 2)
+
+ord = which(lon < 60 & lat > 30)
+plot(lon[ord], lat[ord], pch = 20, col = "gray")
+points(footprints[,"lon"],footprints[,"lat"])
+points(mean_lon, mean_lat, pch = 18, col = "red", cex = 2)
 
 ## Get centroid, range, and variation over composed_pk
 footprints = matrix(0, 7, ncol(pk))
@@ -171,37 +177,84 @@ for (i in 1:nrow(footprints)) {
   d = c(d, distance)
 }
 
+
+mean_lon = sum(footprints[,"lon"] * footprints[,"freq"] ) / sum(footprints[,"freq"])
+mean_lat = sum(footprints[,"lat"] * footprints[,"freq"] ) / sum(footprints[,"freq"])
+
+unweighted_mean_lon = mean(lon)
+unweighted_mean_lat = mean(lat)
+
+
 x = d
 y = footprints[,"freq"]
-plot(x, y, log = "xy", main = "distance from centroid")
-abline(h = mean(y), col = "red", lwd = 2)
-abline(v = mean(x), col = "red", lwd = 2)
+plot(x, y, main = "distance from centroid")
 
 x = footprints[,"radius"]
 y = footprints[,"freq"]
-plot(x, y, log = "xy", main = "range")
-abline(h = mean(y), col = "red", lwd = 2)
-abline(v = mean(x), col = "red", lwd = 2)
+plot(x, y, main = "radius by frequency")
 
-### Compare spatial distributions of terms
-x = d
+x = footprints[,"stdev"]
+y = footprints[,"freq"]
+plot(x, y, main = "stdev by frequency")
+
+
+### Compare spatial distributions of terms, create line of geographical difference (lgd)
+fit = lm(lat ~ lon)
+estimated_x = seq(min(lon),max(lon), length.out = length(lon))
+estimated_y = fit$coefficients[2] * x + fit$coefficients[1]
+estimated_mat = matrix(c(estimated_x, estimated_y), 7507, 2)
+lon = footprints[,"lon"]
+lat = footprints[,"lat"]
+euclidean_distance = function(vec1, vec2) {
+  return(sqrt(sum((vec1 - vec2)^2)))
+}
+lgd = matrix(0, 7507, 2)
+rownames(lgd) = rownames(footprints)
+for (i in 1:nrow(footprints)) {
+  print(i)
+  lati = lat[i]
+  loni = lon[i]
+  veci = c(loni, lati)
+  results = apply(estimated_mat, 1, euclidean_distance, veci)
+  hit = which(results == min(results))
+  lgd[i,] = estimated_mat[hit,]
+}
+
+# Map world
+all_lat = lonlat$LAT
+all_lon = lonlat$LON
+all_lon[all_lon > 180] = all_lon[all_lon > 180] - 360
+ord = which(all_lat > 20 & all_lon < 80 & all_lon > 0)
+plot(all_lon[ord], all_lat[ord], pch= 20, col = "gray")
+points(lon, lat, pch = 20, col = "black")
+points(mean_lon, mean_lat, pch = 20, col = "red")
+lines(lgd[,1], lgd[,2], lwd=1, col="red")
+
+plot(all_lon[ord], all_lat[ord], pch= 20, col = "gray")
+points(unweighted_mean_lon, unweighted_mean_lat, pch = 18, col = "red")
+points(mean_lon, mean_lat, pch = 18, col = "red")
+
+
+# Plot geosemantic field by radius
+x = lgd[,1]
 y = footprints[,"radius"]
-plot(x, y, cex = 0, main = "x = distance, y = stdev")
+plot(x, y, cex = 0, main = "x = line-of-fit, y = radius")
 text(x, y, labels = names(y))
 abline(h = mean(y), col = "red", lwd = 2)
 abline(v = mean(x), col = "red", lwd = 2)
 
-x = d
+# Now plot geosemantic field by deviation
+x = lgd[,1]
 y = footprints[,"stdev"]
-fit = lm(y ~ x)
-adj_y = (fit$coefficients[2] * x) + fit$coefficients[1]
-adj_y = adj_y - 50
-#plot(x, y, cex = 0, main = "x = distance, y = stdev")
-#text(x, y, labels = names(y))
-plot(x, y, main = "x = distance, y = stdev")
+est_y = -3.5 * x + 1090
+plot(x, y, cex = 0, main = "x = line-of-fit, y = stdev")
+text(x, y, labels = names(y))
 abline(h = mean(y), col = "red", lwd = 2)
 abline(v = mean(x), col = "red", lwd = 2)
-lines(x, adj_y, pch=20, col = "red", lwd = 4)
+lines(x, est_y, lwd=2, col="red")
 
-ord = which(fit$residuals < -50)
-spatial_terms = rownames(footprints)[ord]
+# Get spatial terms
+ord = which(y < est_y)
+spatial_terms = sort(x[ord])
+
+
